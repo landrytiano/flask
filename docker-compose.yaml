@@ -18,3 +18,17 @@ services:
     ports:
       - "8181:8181"
     restart: always
+
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: cloudbeaver
+    restart: unless-stopped
+    ports:
+      - "8978:8978"
+    volumes:
+      - cloudbeaver-workspace:/opt/cloudbeaver/workspace
+    depends_on:
+      - phonebook-mysql
+
+volumes:
+  cloudbeaver-workspace:
