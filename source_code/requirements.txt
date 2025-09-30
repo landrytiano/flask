@@ -1,3 +1,6 @@
 flask
 pymysql
+flask_login
+cryptography
+pymysql
 cryptography
