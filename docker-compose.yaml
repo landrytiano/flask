@@ -19,6 +19,17 @@ services:
       - "8181:8181"
     restart: always
 
+    nginx:
+      image: nginx:latest
+      container_name: nginx-proxy
+      volumes:
+        - ./nginx.conf:/etc/nginx/nginx.conf:ro
+        - ./certs:/etc/nginx/certs:ro
+      ports:
+        - "443:443"
+      depends_on:
+        - phonebook-app
+
   cloudbeaver:
     image: dbeaver/cloudbeaver:latest
     container_name: cloudbeaver
