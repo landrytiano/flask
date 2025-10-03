@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 services:
   phonebook-mysql:
@@ -18,17 +18,17 @@ services:
     ports:
       - "8181:8181"
     restart: always
-
-    nginx:
-      image: nginx:latest
-      container_name: nginx-proxy
-      volumes:
-        - ./nginx.conf:/etc/nginx/nginx.conf:ro
-        - ./certs:/etc/nginx/certs:ro
-      ports:
-        - "443:443"
-      depends_on:
-        - phonebook-app
+  
+  nginx:
+    image: nginx:latest
+    container_name: nginx-proxy
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    ports:
+      - "8080:8181"
+    depends_on:
+      - phonebook-app
 
   cloudbeaver:
     image: dbeaver/cloudbeaver:latest
