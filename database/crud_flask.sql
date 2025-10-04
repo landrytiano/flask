@@ -140,6 +140,9 @@ ALTER TABLE `phone_book`
 
 -- Dummy data for all tables
 INSERT INTO university (id_universitas, nama_universitas) VALUES ('dummy_uni', 'Dummy University');
+INSERT INTO university (id_universitas, nama_universitas) VALUES ('UNIV01', 'Universitas Indonesia');
+INSERT INTO university (id_universitas, nama_universitas) VALUES ('UNIV02', 'Universitas Gadjah Mada');
+INSERT INTO university (id_universitas, nama_universitas) VALUES ('UNIV03', 'Institut Teknologi Bandung');
 INSERT INTO peserta (id_peserta, nama, universitas, email, no_telp) VALUES ('dummy_peserta', 'Dummy Peserta', 'dummy_uni', 'dummy@dummy.com', '08123456789');
 INSERT INTO lokasi_osce (id_lokasi_osce, nama_lokasi) VALUES ('dummy_lokasi', 'Dummy Lokasi');
 INSERT INTO osce (id_osce, id_lokasi_osce, tanggal_osce) VALUES ('dummy_osce', 'dummy_lokasi', '2025-10-04');
