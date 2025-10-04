@@ -1,0 +1,21 @@
+# Development overrides for docker-compose.yml
+# Copy this file to docker-compose.override.yml and modify as needed
+
+version: '3.8'
+
+services:
+  aplikasi-kolegium-app:
+    environment:
+      FLASK_ENV: development
+    volumes:
+      - ./source_code:/app:ro
+    ports:
+      - "8181:8181"
+
+  aplikasi-kolegium-mysql:
+    ports:
+      - "3306:3306"  # Expose MySQL port for development
+
+  nginx:
+    ports:
+      - "8080:8181"

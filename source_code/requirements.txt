@@ -1,6 +1,5 @@
 flask
-pymysql
 flask_login
-cryptography
 pymysql
+pandas
 cryptography

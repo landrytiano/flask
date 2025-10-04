@@ -1,73 +1,88 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" class="dark">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-  
-  <title>Phone Book</title>
-  
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css')}}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminLTE.min.css')}}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/_all-skins.min.css')}}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/dataTables.bootstrap.css')}}">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error - Aplikasi Kolegium</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {}
+      }
+    }
+  </script>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 </head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen flex items-center justify-center">
+  <div class="max-w-md w-full space-y-8">
+    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-8 text-center">
+      <div class="mx-auto h-16 w-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mb-4">
+        <svg class="h-8 w-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>
+      </div>
 
-<body class="hold-transition skin-blue layout-top-nav">
-  <div class="wrapper">
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+        {% if error %}
+          Error {{ error.code if error.code else '500' }}
+        {% else %}
+          Page Not Found
+        {% endif %}
+      </h1>
 
-    <header class="main-header">
-      <nav class="navbar navbar-static-top">
-        <div class="container">
-          <div class="navbar-header">
-            <a href="/" class="navbar-brand"><b>Phone</b>Book</a>
+      <p class="text-gray-600 dark:text-gray-400 mb-6">
+        {% if error and error.code == 404 %}
+          The page you're looking for doesn't exist.
+        {% elif error and error.code == 500 %}
+          Something went wrong on our end. Please try again later.
+        {% else %}
+          An unexpected error occurred.
+        {% endif %}
+      </p>
+
+      <div class="space-y-3">
+        <a href="{{ url_for('index') }}"
+           class="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150">
+          Go to Dashboard
+        </a>
+
+        <button onclick="history.back()"
+                class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150">
+          Go Back
+        </button>
+      </div>
+
+      {% if error %}
+        <details class="mt-6 text-left">
+          <summary class="cursor-pointer text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+            Technical Details
+          </summary>
+          <div class="mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded text-xs font-mono text-gray-800 dark:text-gray-200">
+            <strong>Error:</strong> {{ error.description if error.description else 'Unknown error' }}<br>
+            <strong>Code:</strong> {{ error.code if error.code else 'N/A' }}<br>
+            <strong>Path:</strong> {{ request.path }}
           </div>
+        </details>
+      {% endif %}
+
+      <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-center">
+          <span class="text-sm text-gray-600 dark:text-gray-400">Dark Mode</span>
+          <label class="relative inline-flex items-center cursor-pointer ml-3">
+            <input type="checkbox" id="theme-toggle" class="sr-only peer" onchange="toggleDarkMode()">
+            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+          </label>
         </div>
-      </nav>
-    </header>
-
-    <div class="content-wrapper">
-      <div class="container">  
-        <section class="content">
-           <div class="error-page">
-            <h2 class="headline text-yellow"> 404</h2>
-
-            <div class="error-content">
-              <h3><i class="fa fa-warning text-yellow"></i> Oops! Page not found.</h3>
-              <p>
-                We could not find the page you were looking for.
-                Meanwhile, you may return to <a href="/"><code>index page</code></a>
-              </p>
-            </div>
-          </div>
-        </section>
       </div>
     </div>
 
-
-    <footer class="main-footer">
-      <div class="container">
-        <div class="pull-right hidden-xs">
-          <b>Version</b> 0.1
-        </div>
-      </div>
-    </footer>
+    <div class="text-center">
+      <p class="text-sm text-gray-600 dark:text-gray-400">
+        Aplikasi Kolegium - Version 0.1
+      </p>
+    </div>
   </div>
-  
-
-  <script src="{{ url_for('static', filename='js/jquery-2.2.3.min.js')}}"></script>
-  <script src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>
-  <script src="{{ url_for('static', filename='js/app.min.js')}}"></script>
-  <script src="{{ url_for('static', filename='js/jquery.dataTables.min.js')}}"></script>
-  <script src="{{ url_for('static', filename='js/dataTables.bootstrap.min.js')}}"></script>
-
-  <script>
-    $(function () {
-      $("#dataphone").DataTable();
-      
-    });
-  </script>
-
 </body>
 </html>

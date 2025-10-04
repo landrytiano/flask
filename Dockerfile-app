@@ -1,8 +1,27 @@
 FROM python:3.10-slim
 
+# Set working directory
 WORKDIR /app
-COPY source_code/ /app
 
-RUN pip install -r requirements.txt
+# Copy requirements first for better caching
+COPY source_code/requirements.txt /app/
 
-ENTRYPOINT ["python", "server.py"]
+# Install dependencies and curl for health checks
+RUN pip install --no-cache-dir -r requirements.txt && \
+    apt-get update && \
+    apt-get install -y curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy the application code
+COPY source_code/ /app/
+
+# Expose the port the app runs on
+EXPOSE 8181
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8181/health || exit 1
+
+# Use CMD instead of ENTRYPOINT for better flexibility
+CMD ["python", "server.py"]

@@ -1,24 +1,51 @@
-version: '3'
-
 services:
-  phonebook-mysql:
-    container_name: phonebook-mysql
+  aplikasi-kolegium-mysql:
+    container_name: aplikasi-kolegium-mysql
     build:
       context: .
       dockerfile: Dockerfile-mysql
     restart: always
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-crud_flask}
+      MYSQL_USER: ${MYSQL_USER:-dev}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-dev}
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    volumes:
+      - mysql_data:/var/lib/mysql
 
-  phonebook-app:
-    container_name: phonebook-app
+  aplikasi-kolegium-app:
+    container_name: aplikasi-kolegium-app
     build:
       context: .
       dockerfile: Dockerfile-app
     depends_on:
-      - phonebook-mysql
+      aplikasi-kolegium-mysql:
+        condition: service_healthy
     ports:
-      - "8181:8181"
+      - "${APP_PORT:-8181}:8181"
     restart: always
-  
+    environment:
+      DB_HOST: aplikasi-kolegium-mysql
+      DB_USER: ${MYSQL_USER:-dev}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-dev}
+      DB_NAME: ${MYSQL_DATABASE:-crud_flask}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-adminpass}
+    volumes:
+      - ./source_code/static:/app/static:ro
+      - ./source_code/templates:/app/templates:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8181/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   nginx:
     image: nginx:latest
     container_name: nginx-proxy
@@ -26,20 +53,11 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certs:/etc/nginx/certs:ro
     ports:
-      - "8080:8181"
+      - "${NGINX_PORT:-8080}:8181"
     depends_on:
-      - phonebook-app
-
-  cloudbeaver:
-    image: dbeaver/cloudbeaver:latest
-    container_name: cloudbeaver
-    restart: unless-stopped
-    ports:
-      - "8978:8978"
-    volumes:
-      - cloudbeaver-workspace:/opt/cloudbeaver/workspace
-    depends_on:
-      - phonebook-mysql
+      aplikasi-kolegium-app:
+        condition: service_healthy
+    restart: always
 
 volumes:
-  cloudbeaver-workspace:
+  mysql_data:

@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <title>Tambah Peserta Baru</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</head>
+<body class="bg-gray-900 dark:bg-gray-900 text-gray-100 min-h-screen">
+  <script>
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+    }
+  </script>
+  <div class="flex flex-col min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col justify-between">
+      <div>
+        <div class="flex items-center h-16 px-6 border-b border-gray-700">
+          <span class="text-2xl font-bold text-blue-400">PhoneBook</span>
+        </div>
+        <nav class="mt-6 px-6 space-y-2">
+          <a href="{{ url_for('index') }}" class="flex items-center px-3 py-2 rounded-lg bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400 font-semibold">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Dashboard
+          </a>
+          <a href="{{ url_for('add') }}" class="flex items-center px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Add Entry
+          </a>
+          <a href="{{ url_for('peserta.peserta_list') }}" class="flex items-center px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h8M12 8v8"/></svg>
+            Peserta List
+          </a>
+          <a href="{{ url_for('peserta.peserta_add') }}" class="flex items-center px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Add Peserta
+          </a>
+          <a href="{{ url_for('peserta.peserta_upload') }}" class="flex items-center px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16v16H4z"/></svg>
+            Bulk Upload Peserta
+          </a>
+        </nav>
+      </div>
+      <div class="px-6 py-4 border-t border-gray-700">
+        <button onclick="toggleDarkMode()" class="w-full px-4 py-2 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition">Toggle Dark/Light Mode</button>
+        <div class="mt-4 text-xs text-gray-500">Version 0.1</div>
+      </div>
+    </aside>
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col">
+      <header class="h-16 flex items-center px-8 border-b border-gray-700 bg-gray-900">
+        <span class="text-xl font-bold">Tambah Peserta Baru</span>
+      </header>
+      <section class="flex-1 p-8 overflow-y-auto">
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+          <div class="mb-4 px-4 py-3 rounded bg-blue-900 text-blue-200 border border-blue-700 flex items-center justify-between">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" class="ml-2 text-blue-400 hover:text-blue-200">&times;</button>
+          </div>
+        {% endfor %}
+  <div class="bg-gray-900 shadow rounded-lg p-6 max-w-lg mx-auto">
+          <form method="post" class="space-y-6">
+            <div>
+              <label for="id_peserta" class="block text-gray-300 font-medium mb-2">ID Peserta:</label>
+              <input type="text" name="id_peserta" id="id_peserta" class="w-full px-4 py-2 border border-gray-700 rounded bg-gray-900 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+            </div>
+            <div>
+              <label for="nama" class="block text-gray-300 font-medium mb-2">Nama:</label>
+              <input type="text" name="nama" id="nama" class="w-full px-4 py-2 border border-gray-700 rounded bg-gray-900 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+            </div>
+            <div>
+              <label for="universitas" class="block text-gray-300 font-medium mb-2">Universitas:</label>
+              <select name="universitas" id="universitas" class="w-full px-4 py-2 border border-gray-700 rounded bg-gray-900 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                <option value="">-- Pilih Universitas --</option>
+                {% for u in universitas_list %}
+                  <option value="{{ u.id_universitas }}">{{ u.nama_universitas }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label for="email" class="block text-gray-700 font-medium mb-2">Email:</label>
+              <input type="email" name="email" id="email" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+            </div>
+            <div>
+              <label for="no_telp" class="block text-gray-700 font-medium mb-2">No. Telp:</label>
+              <input type="text" name="no_telp" id="no_telp" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
+            </div>
+            <div class="flex justify-end gap-2">
+              <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Tambah Peserta</button>
+              <a href="{{ url_for('peserta.peserta_list') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition">Kembali ke Daftar Peserta</a>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+  <footer class="bg-gray-900 border-t border-gray-700 py-4 px-8 flex justify-end text-gray-400 text-sm rounded-b-lg">
+    Version 0.1
+  </footer>
+</body>
+</html>

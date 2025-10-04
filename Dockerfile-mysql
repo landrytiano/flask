@@ -1,8 +1,18 @@
 FROM mysql:8.0
 
-ENV MYSQL_DATABASE crud_flask
-ENV MYSQL_USER dev
-ENV MYSQL_PASSWORD dev
-ENV MYSQL_RANDOM_ROOT_PASSWORD yes
+# Set environment variables with defaults
+ENV MYSQL_DATABASE=${MYSQL_DATABASE:-crud_flask}
+ENV MYSQL_USER=${MYSQL_USER:-app_user}
+ENV MYSQL_PASSWORD=${MYSQL_PASSWORD:-secure_password_change_me}
+ENV MYSQL_RANDOM_ROOT_PASSWORD=yes
+ENV MYSQL_ROOT_HOST=%
 
+# Copy database initialization scripts
 COPY database/ /docker-entrypoint-initdb.d/
+
+# Expose MySQL port
+EXPOSE 3306
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD mysqladmin ping -h localhost || exit 1

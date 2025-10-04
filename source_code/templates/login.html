@@ -1,33 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Aplikasi Kolegium</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {}
+      }
+    }
+  </script>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 </head>
-<body>
-    <div class="container">
-        <h2>Login</h2>
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <div class="alert alert-warning">
-              {% for message in messages %}
-                <p>{{ message }}</p>
-              {% endfor %}
-            </div>
-          {% endif %}
-        {% endwith %}
-        <form method="POST" action="{{ url_for('login') }}">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" class="form-control" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen flex items-center justify-center">
+  <div class="max-w-md w-full space-y-8">
+    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-8">
+      <div class="text-center">
+        <div class="mx-auto h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center">
+          <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <h2 class="mt-6 text-3xl font-bold text-gray-900 dark:text-gray-100">
+          Aplikasi Kolegium
+        </h2>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          OSCE Administration System
+        </p>
+      </div>
+
+      <form class="mt-8 space-y-6" method="POST">
+        <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+          <div class="bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 px-4 py-3 rounded">
+            {{ message }}
+          </div>
+        {% endfor %}
+
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Username
+          </label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter your username"
+          >
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Password
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter your password"
+          >
+        </div>
+
+        <div>
+          <button
+            type="submit"
+            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
+          >
+            Sign In
+          </button>
+        </div>
+      </form>
+
+      <div class="mt-6 text-center">
+        <div class="flex items-center justify-center">
+          <span class="text-sm text-gray-600 dark:text-gray-400">Dark Mode</span>
+          <label class="relative inline-flex items-center cursor-pointer ml-3">
+            <input type="checkbox" id="theme-toggle" class="sr-only peer" onchange="toggleDarkMode()">
+            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+      </div>
     </div>
+
+    <div class="text-center">
+      <p class="text-sm text-gray-600 dark:text-gray-400">
+        Version 0.1 - OSCE Administration System
+      </p>
+    </div>
+  </div>
 </body>
 </html>
