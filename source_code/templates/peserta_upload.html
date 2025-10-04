@@ -76,14 +76,87 @@
       
       <!-- Content -->
       <section class="flex-1 p-8 overflow-y-auto">
-        {% for category, message in get_flashed_messages(with_categories=true) %}
-          <div class="mb-4 px-4 py-3 rounded bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-700 flex items-center justify-between">
-            <span>{{ message }}</span>
-            <button onclick="this.parentElement.remove()" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200">&times;</button>
+        {% if show_preview %}
+        <!-- Data Preview Section -->
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 max-w-6xl mx-auto mb-8">
+          <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Data Preview & Selection</h3>
+            <p class="text-gray-600 dark:text-gray-400 text-sm">Review the data below and select which records you want to upload.</p>
+            
+            {% if validation_errors %}
+            <div class="mt-4 p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg">
+              <h4 class="font-medium text-red-800 dark:text-red-200 mb-2">Validation Errors:</h4>
+              <ul class="text-sm text-red-700 dark:text-red-300 space-y-1">
+                {% for error in validation_errors %}
+                <li>• {{ error }}</li>
+                {% endfor %}
+              </ul>
+              <p class="text-sm text-red-600 dark:text-red-400 mt-2">Please fix these errors in your file and upload again.</p>
+            </div>
+            {% endif %}
           </div>
-        {% endfor %}
-        
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 max-w-lg mx-auto">
+          
+          <form method="post" class="space-y-6">
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <input type="checkbox" id="select-all" class="rounded border-gray-300 dark:border-gray-600">
+                      Select
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID Peserta</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nama</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Universitas</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">No. Telp</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {% for row in upload_data %}
+                  <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <input type="checkbox" name="selected_records" value="{{ loop.index0 }}" class="record-checkbox rounded border-gray-300 dark:border-gray-600" {% if not validation_errors %}checked{% endif %}>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{{ row.id_peserta or '' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ row.nama or '' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ row.universitas or '' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ row.email or '' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ row.no_telp or '' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      {% set has_error = false %}
+                      {% if not row.id_peserta or not row.nama or not row.email or not row.universitas %}
+                        {% set has_error = true %}
+                      {% endif %}
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        {% if has_error %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                        {% else %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% endif %}">
+                        {% if has_error %}Error{% else %}Valid{% endif %}
+                      </span>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="flex justify-between items-center">
+              <div class="text-sm text-gray-600 dark:text-gray-400">
+                Total records: {{ upload_data|length }} | 
+                Selected: <span id="selected-count">{{ upload_data|length if not validation_errors else 0 }}</span>
+              </div>
+              <div class="flex gap-2">
+                <a href="{{ url_for('peserta.peserta_upload') }}" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-400 dark:hover:bg-gray-500 transition">Upload Different File</a>
+                {% if not validation_errors %}
+                <button type="submit" name="confirm_upload" value="1" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Confirm Upload</button>
+                {% endif %}
+              </div>
+            </div>
+          </form>
+        </div>
+        {% else %}
+        <!-- Upload Form Section -->
           <div class="mb-6">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Upload File Peserta</h3>
             <p class="text-gray-600 dark:text-gray-400 text-sm">Upload file Excel (.xlsx) atau CSV untuk menambahkan peserta secara bulk.</p>
@@ -99,8 +172,8 @@
             <div class="flex flex-col gap-2">
               <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Upload File</button>
               <div class="flex gap-2">
-                <a href="/source_code/templates/peserta_upload_template.xlsx" download class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm">Download Template Excel</a>
-                <a href="/source_code/templates/peserta_upload_template.csv" download class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition text-sm">Download Template CSV</a>
+                <a href="{{ url_for('download_template', file_type='excel') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm">Download Template Excel</a>
+                <a href="{{ url_for('download_template', file_type='csv') }}" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition text-sm">Download Template CSV</a>
               </div>
               <a href="{{ url_for('peserta.peserta_list') }}" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-400 dark:hover:bg-gray-500 transition text-center">Kembali ke Daftar Peserta</a>
             </div>
@@ -115,6 +188,7 @@
             </ul>
           </div>
         </div>
+        {% endif %}
       </section>
       
       <!-- Footer -->
@@ -125,5 +199,27 @@
       </footer>
     </main>
   </div>
+
+  <script>
+    // Select all functionality
+    document.getElementById('select-all')?.addEventListener('change', function() {
+      const checkboxes = document.querySelectorAll('.record-checkbox');
+      checkboxes.forEach(cb => cb.checked = this.checked);
+      updateSelectedCount();
+    });
+
+    // Update selected count when individual checkboxes change
+    document.querySelectorAll('.record-checkbox').forEach(cb => {
+      cb.addEventListener('change', updateSelectedCount);
+    });
+
+    function updateSelectedCount() {
+      const selected = document.querySelectorAll('.record-checkbox:checked').length;
+      document.getElementById('selected-count').textContent = selected;
+    }
+
+    // Initialize count on page load
+    document.addEventListener('DOMContentLoaded', updateSelectedCount);
+  </script>
 </body>
 </html>

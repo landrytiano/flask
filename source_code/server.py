@@ -16,7 +16,7 @@
 # Make sure you have the HTML templates: peserta_list.html, peserta_upload.html, peserta_add.html
 
 # All imports at the top
-from flask import Blueprint, request, render_template, redirect, url_for, flash, Flask, session
+from flask import Blueprint, request, render_template, redirect, url_for, flash, Flask, session, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from module.database import Database
@@ -60,10 +60,61 @@ def peserta_list():
 @peserta_bp.route('/upload', methods=['GET', 'POST'])
 def peserta_upload():
     if request.method == 'POST':
+        # Check if this is the confirmation step
+        if request.form.get('confirm_upload'):
+            selected_indices = request.form.getlist('selected_records')
+            if not selected_indices:
+                flash('No records selected for upload', 'warning')
+                return redirect(url_for('peserta.peserta_upload'))
+            
+            # Get the stored data from session
+            upload_data = session.get('upload_data')
+            if not upload_data:
+                flash('Upload session expired. Please upload the file again.', 'error')
+                return redirect(url_for('peserta.peserta_upload'))
+            
+            # Process selected records
+            conn = pymysql.connect(
+                host=os.getenv('DB_HOST', 'aplikasi-kolegium-mysql'),
+                user=os.getenv('DB_USER', 'dev'),
+                password=os.getenv('DB_PASSWORD', 'dev'),
+                db=os.getenv('DB_NAME', 'crud_flask'),
+                charset='utf8mb4',
+                cursorclass=pymysql.cursors.DictCursor
+            )
+            
+            inserted, errors = 0, []
+            for idx in selected_indices:
+                row = upload_data[int(idx)]
+                try:
+                    with conn.cursor() as cursor:
+                        cursor.execute(
+                            'INSERT INTO peserta (id_peserta, nama, universitas, email, no_telp) VALUES (%s, %s, %s, %s, %s)',
+                            (row.get('id_peserta'), row.get('nama'), row.get('universitas'), row.get('email'), row.get('no_telp'))
+                        )
+                    conn.commit()
+                    inserted += 1
+                except Exception as e:
+                    errors.append(f"Row {int(idx)+1}: {str(e)}")
+            
+            conn.close()
+            
+            # Clear session data
+            session.pop('upload_data', None)
+            
+            if errors:
+                flash(f'Successfully inserted {inserted} records. Errors: {" | ".join(errors)}', 'warning')
+            else:
+                flash(f'Successfully inserted all {inserted} records!', 'success')
+            
+            return redirect(url_for('peserta.peserta_list'))
+        
+        # File upload step
         file = request.files.get('file')
         if not file:
             flash('No file selected', 'error')
             return redirect(url_for('peserta.peserta_upload'))
+        
         # Determine file type and read into pandas DataFrame
         filename = file.filename.lower()
         try:
@@ -77,34 +128,32 @@ def peserta_upload():
         except Exception as e:
             flash(f'Error reading file: {e}', 'error')
             return redirect(url_for('peserta.peserta_upload'))
-        conn = pymysql.connect(
-            host=os.getenv('DB_HOST', 'aplikasi-kolegium-mysql'),
-            user=os.getenv('DB_USER', 'dev'),
-            password=os.getenv('DB_PASSWORD', 'dev'),
-            db=os.getenv('DB_NAME', 'crud_flask'),
-            charset='utf8mb4',
-            cursorclass=pymysql.cursors.DictCursor
-        )
-        inserted, errors = 0, []
-        # Loop through each row in the file
-        for _, row in df.iterrows():
-            try:
-                with conn.cursor() as cursor:
-                    # Insert peserta into database
-                    cursor.execute(
-                        'INSERT INTO peserta (id_peserta, nama, universitas, email, no_telp) VALUES (%s, %s, %s, %s, %s)',
-                        (row.get('id_peserta'), row.get('nama'), row.get('universitas'), row.get('email'), row.get('no_telp'))
-                    )
-                conn.commit()
-                inserted += 1
-            except Exception as e:
-                # Collect errors for reporting
-                errors.append(str(e))
-        conn.close()
-        # Show summary of upload
-        flash(f'Inserted: {inserted}, Errors: {len(errors)}', 'info')
-        return redirect(url_for('peserta.peserta_list'))
-    # Render the upload form template
+        
+        # Convert DataFrame to list of dicts for session storage
+        upload_data = df.to_dict('records')
+        
+        # Store in session for the confirmation step
+        session['upload_data'] = upload_data
+        
+        # Validate data and show preview
+        validation_errors = []
+        for i, row in enumerate(upload_data):
+            if not row.get('id_peserta'):
+                validation_errors.append(f"Row {i+1}: Missing ID Peserta")
+            if not row.get('nama'):
+                validation_errors.append(f"Row {i+1}: Missing Nama")
+            if not row.get('email'):
+                validation_errors.append(f"Row {i+1}: Missing Email")
+            if not row.get('universitas'):
+                validation_errors.append(f"Row {i+1}: Missing Universitas")
+        
+        return render_template('peserta_upload.html', 
+                             upload_data=upload_data, 
+                             validation_errors=validation_errors,
+                             show_preview=True)
+    
+    # Clear any existing upload data
+    session.pop('upload_data', None)
     return render_template('peserta_upload.html')
 
 # --- Add a single peserta ---
@@ -258,12 +307,38 @@ def logout():
     flash('You have been logged out.')
     return redirect(url_for('login', _external=True))
 
+@app.route('/download-template/<file_type>')
+def download_template(file_type):
+    """Download template files for bulk upload"""
+    if file_type == 'excel':
+        filename = 'peserta_upload_template.xlsx'
+        mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    elif file_type == 'csv':
+        filename = 'peserta_upload_template.csv'
+        mimetype = 'text/csv'
+    else:
+        flash('Invalid template type', 'error')
+        return redirect(url_for('peserta.peserta_upload'))
+    
+    template_path = os.path.join(app.root_path, 'templates', filename)
+    if not os.path.exists(template_path):
+        flash('Template file not found', 'error')
+        return redirect(url_for('peserta.peserta_upload'))
+    
+    return send_file(template_path, as_attachment=True, download_name=filename, mimetype=mimetype)
+
 # --- Protect resources ---
 @app.before_request
 def require_login():
-    # Allow access to login page and static files without authentication
-    allowed_routes = ['login', 'static']
-    if not current_user.is_authenticated and request.endpoint not in allowed_routes:
+    # Allow access to login page, static files, health check, and template downloads without authentication
+    allowed_paths = ['/login', '/static', '/health', '/download-template/']
+    
+    for allowed_path in allowed_paths:
+        if request.path.startswith(allowed_path):
+            return
+    
+    # Require authentication for all other routes
+    if not current_user.is_authenticated:
         return redirect(url_for('login', next=request.endpoint))
 
 if __name__ == '__main__':

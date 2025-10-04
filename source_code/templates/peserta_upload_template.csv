@@ -1,3 +1,6 @@
 id_peserta,nama,universitas,email,no_telp
-P001,Budi Santoso,UNIV01,budi@example.com,08123456789
-P002,Siti Aminah,UNIV02,siti@example.com,08129876543
+P001,Ahmad Rahman,UNIV01,ahmad.rahman@univ1.edu,081234567890
+P002,Siti Nurhaliza,UNIV02,siti.nurhaliza@univ2.edu,081298765432
+P003,Budi Santoso,UNIV01,budi.santoso@univ1.edu,081345678901
+P004,Maria Angelina,UNIV03,maria.angelina@univ3.edu,081456789012
+P005,Dedi Kurniawan,UNIV02,dedi.kurniawan@univ2.edu,081567890123
